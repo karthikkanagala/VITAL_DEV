@@ -1,0 +1,254 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VitalScan Health Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Inter", Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; padding: 32px 16px; color: #1e293b; -webkit-print-color-adjust: exact; }
+  .page { width: 794px; background: #ffffff; border: 10px solid #1e293b; border-radius: 4px; overflow: visible; }
+  .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #334155; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #e0f9fb; display: flex; align-items: center; gap: 6px; }
+  .label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 3px; }
+  .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f0fdfe; border-radius: 6px; margin-bottom: 6px; font-size: 13px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div style="background:linear-gradient(135deg,#0f172a 60%,#164e63); padding:28px 36px 24px; position:relative; overflow:hidden;">
+    <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(17,196,212,0.12);"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:44px;height:44px;background:#11c4d4;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:22px;">&#10084;</span>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:900;color:#ffffff;letter-spacing:-0.03em;text-transform:uppercase;">VitalScan</div>
+          <div style="height:2px;background:#11c4d4;margin-top:3px;border-radius:2px;"></div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:9px;font-weight:700;color:#11c4d4;text-transform:uppercase;letter-spacing:0.1em;">Report Identifier</div>
+        <div style="font-size:15px;font-weight:800;color:#ffffff;font-family:monospace;margin-top:2px;">{{REPORT_ID}}</div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Generated: {{REPORT_DATE}}</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:20px;">
+      <div style="font-size:22px;font-weight:900;color:#ffffff;text-transform:uppercase;letter-spacing:-0.01em;">VitalScan Health Report</div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Lifestyle Risk Intelligence &amp; Preventive Health Assessment</div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div style="padding:28px 36px;">
+
+    <!-- PATIENT INFORMATION -->
+    <div style="margin-bottom:24px;">
+      <div class="section-title">&#128100; Patient Information</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+        <div class="card">
+          <div class="label">Age</div>
+          <div style="font-size:18px;font-weight:800;color:#1e293b;">{{AGE}} <span style="font-size:11px;font-weight:400;color:#64748b;">yrs</span></div>
+        </div>
+        <div class="card">
+          <div class="label">Sex</div>
+          <div style="font-size:16px;font-weight:700;color:#1e293b;">{{SEX}}</div>
+        </div>
+        <div class="card">
+          <div class="label">Height</div>
+          <div style="font-size:18px;font-weight:800;color:#1e293b;">{{HEIGHT}} <span style="font-size:11px;font-weight:400;color:#64748b;">cm</span></div>
+        </div>
+        <div class="card">
+          <div class="label">Weight</div>
+          <div style="font-size:18px;font-weight:800;color:#1e293b;">{{WEIGHT}} <span style="font-size:11px;font-weight:400;color:#64748b;">kg</span></div>
+        </div>
+        <div class="card">
+          <div class="label">Waist</div>
+          <div style="font-size:18px;font-weight:800;color:#1e293b;">{{WAIST}} <span style="font-size:11px;font-weight:400;color:#64748b;">cm</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RISK ASSESSMENT -->
+    <div style="margin-bottom:24px;">
+      <div class="section-title">&#9888; Risk Assessment</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+
+        <!-- Heart -->
+        <div style="padding:16px;border-radius:10px;border:2px solid {{HEART_COLOR}};background:{{HEART_BG}};">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">&#10084; Heart Disease</div>
+          <div style="font-size:44px;font-weight:900;color:{{HEART_COLOR}};line-height:1;margin-bottom:8px;">{{HEART_RISK}}<span style="font-size:22px;font-weight:700;">%</span></div>
+          <div style="height:6px;background:#e2e8f0;border-radius:9999px;overflow:hidden;margin-bottom:8px;">
+            <div style="height:6px;background:{{HEART_COLOR}};border-radius:9999px;width:{{HEART_RISK}}%;"></div>
+          </div>
+          <span class="pill" style="background:{{HEART_COLOR}};color:#fff;">{{HEART_LABEL}}</span>
+          <div style="margin-top:10px;">{{HEART_FACTORS_HTML}}</div>
+        </div>
+
+        <!-- Diabetes -->
+        <div style="padding:16px;border-radius:10px;border:2px solid {{DIABETES_COLOR}};background:{{DIABETES_BG}};">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">&#128167; Diabetes</div>
+          <div style="font-size:44px;font-weight:900;color:{{DIABETES_COLOR}};line-height:1;margin-bottom:8px;">{{DIABETES_RISK}}<span style="font-size:22px;font-weight:700;">%</span></div>
+          <div style="height:6px;background:#e2e8f0;border-radius:9999px;overflow:hidden;margin-bottom:8px;">
+            <div style="height:6px;background:{{DIABETES_COLOR}};border-radius:9999px;width:{{DIABETES_RISK}}%;"></div>
+          </div>
+          <span class="pill" style="background:{{DIABETES_COLOR}};color:#fff;">{{DIABETES_LABEL}}</span>
+          <div style="margin-top:10px;">{{DIABETES_FACTORS_HTML}}</div>
+        </div>
+
+        <!-- Obesity -->
+        <div style="padding:16px;border-radius:10px;border:2px solid {{OBESITY_COLOR}};background:{{OBESITY_BG}};">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">&#9881; Obesity</div>
+          <div style="font-size:44px;font-weight:900;color:{{OBESITY_COLOR}};line-height:1;margin-bottom:8px;">{{OBESITY_RISK}}<span style="font-size:22px;font-weight:700;">%</span></div>
+          <div style="height:6px;background:#e2e8f0;border-radius:9999px;overflow:hidden;margin-bottom:8px;">
+            <div style="height:6px;background:{{OBESITY_COLOR}};border-radius:9999px;width:{{OBESITY_RISK}}%;"></div>
+          </div>
+          <span class="pill" style="background:{{OBESITY_COLOR}};color:#fff;">{{OBESITY_LABEL}}</span>
+          <div style="margin-top:10px;">{{OBESITY_FACTORS_HTML}}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BODY METRICS + HEALTH HISTORY -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+      <div>
+        <div class="section-title">&#128202; Body Metrics</div>
+        <div class="row">
+          <span style="font-size:13px;font-weight:500;color:#334155;">BMI (Body Mass Index)</span>
+          <span style="font-size:13px;font-weight:700;color:#11c4d4;">{{BMI_VALUE}} <span style="font-size:11px;font-weight:400;color:#64748b;">{{BMI_CATEGORY}}</span></span>
+        </div>
+        <div class="row">
+          <span style="font-size:13px;font-weight:500;color:#334155;">Waist to Height Ratio</span>
+          <span style="font-size:13px;font-weight:700;color:#11c4d4;">{{WHR_VALUE}} <span style="font-size:11px;font-weight:400;color:#64748b;">{{WHR_CATEGORY}}</span></span>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">&#128203; Health History</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px;">
+          <span style="color:#64748b;">Family Heart Disease</span>
+          {{FAMILY_HEART_HTML}}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px;">
+          <span style="color:#64748b;">Family Diabetes History</span>
+          <span style="font-weight:600;color:#1e293b;">{{FAMILY_DIAB}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px;">
+          <span style="color:#64748b;">Chest Discomfort</span>
+          <span style="font-weight:600;color:#1e293b;">{{CHEST_DISCOMFORT}}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13px;">
+          <span style="color:#64748b;">Excessive Thirst</span>
+          <span style="font-weight:600;color:#1e293b;">{{EXCESSIVE_THIRST}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIFESTYLE + DIETARY -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+      <div>
+        <div class="section-title">&#127939; Lifestyle</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="card">
+            <div class="label">Physical Activity</div>
+            <div style="font-size:13px;font-weight:600;color:#1e293b;">{{ACTIVITY_LABEL}}</div>
+          </div>
+          <div class="card">
+            <div class="label">Sleep Hours</div>
+            <div style="font-size:13px;font-weight:600;color:#1e293b;">{{SLEEP_HOURS}} hrs/night</div>
+          </div>
+          <div class="card">
+            <div class="label">Stress Level</div>
+            <div style="font-size:13px;font-weight:600;{{STRESS_COLOR_STYLE}}">{{STRESS_LABEL}}</div>
+          </div>
+          <div class="card">
+            <div class="label">Smoking Status</div>
+            <div style="font-size:13px;font-weight:600;color:#1e293b;">{{SMOKING_LABEL}}</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">&#127860; Dietary Intake</div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-size:10px;color:#64748b;font-weight:500;">Fried Foods</span>
+              <span style="font-size:10px;color:#334155;font-weight:600;">{{FRIED_LABEL}}</span>
+            </div>
+            <div style="height:6px;background:#e2e8f0;border-radius:9999px;overflow:hidden;">
+              <div style="height:6px;background:#11c4d4;border-radius:9999px;width:{{FRIED_BAR_WIDTH}};"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-size:10px;color:#64748b;font-weight:500;">Salt Intake</span>
+              <span style="font-size:10px;color:#334155;font-weight:600;">{{SALT_LABEL}}</span>
+            </div>
+            <div style="height:6px;background:#e2e8f0;border-radius:9999px;overflow:hidden;">
+              <div style="height:6px;background:#11c4d4;border-radius:9999px;width:{{SALT_BAR_WIDTH}};"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-size:10px;color:#64748b;font-weight:500;">Sugar Intake</span>
+              <span style="font-size:10px;color:#334155;font-weight:600;">{{SUGAR_LABEL}}</span>
+            </div>
+            <div style="height:6px;background:#e2e8f0;border-radius:9999px;overflow:hidden;">
+              <div style="height:6px;background:#11c4d4;border-radius:9999px;width:{{SUGAR_BAR_WIDTH}};"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-size:10px;color:#64748b;font-weight:500;">Water Intake</span>
+              <span style="font-size:10px;color:#334155;font-weight:600;">{{WATER_LABEL}}</span>
+            </div>
+            <div style="height:6px;background:#e2e8f0;border-radius:9999px;overflow:hidden;">
+              <div style="height:6px;background:#11c4d4;border-radius:9999px;width:{{WATER_BAR_WIDTH}};"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTION PLAN -->
+    <div style="margin-bottom:24px;">
+      <div class="section-title">&#9989; Recommended Action Plan</div>
+      <div>{{ACTION_PLAN_HTML}}</div>
+    </div>
+
+    <!-- SUMMARY BOX -->
+    <div style="background:#0f172a;color:#ffffff;padding:20px 24px;border-radius:12px;margin-bottom:8px;">
+      <div style="font-size:9px;font-weight:700;color:#11c4d4;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Automated Risk Intelligence Summary</div>
+      <div style="font-size:13px;line-height:1.6;color:#cbd5e1;">{{SUMMARY_TEXT}}</div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 36px;display:flex;justify-content:space-between;align-items:flex-end;">
+    <div style="max-width:420px;">
+      <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Medical Disclaimer</div>
+      <div style="font-size:8px;color:#94a3b8;line-height:1.5;">This VitalScan report is for educational and wellness purposes only. It does not constitute a clinical medical diagnosis or treatment plan. Information provided is based on self-reported data and basic biometric screening. Always consult a licensed healthcare professional before making health decisions.</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="display:flex;gap:16px;justify-content:flex-end;margin-bottom:6px;">
+        <div style="text-align:center;">
+          <div style="font-size:8px;font-weight:700;color:#94a3b8;text-transform:uppercase;">Encryption</div>
+          <div style="font-size:18px;color:#11c4d4;">&#128274;</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:8px;font-weight:700;color:#94a3b8;text-transform:uppercase;">Certified</div>
+          <div style="font-size:18px;color:#11c4d4;">&#10004;</div>
+        </div>
+      </div>
+      <div style="font-size:9px;color:#94a3b8;">&copy; {{REPORT_YEAR}} VitalScan Health Intelligence Labs</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

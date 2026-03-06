@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VitalScan Health Report</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#11c4d4",
+              "background-light": "#f6f8f8",
+              "background-dark": "#102022",
+            },
+            fontFamily: {
+              "display": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        @media print {
+            .no-print { display: none; }
+            body { background: white; }
+            .a4-page { 
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+        }
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased p-4 md:p-8 flex flex-col items-center">
+<!-- Export/Action Bar (No Print) -->
+<!-- Main Report Container -->
+<div class="a4-page bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border-[12px] border-slate-900 dark:border-slate-800 relative flex flex-col">
+<!-- Curved Teal Accents -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-[100%] -z-0 pointer-events-none"></div>
+<div class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-primary/10 to-transparent rounded-tr-[100%] -z-0 pointer-events-none"></div>
+<!-- Header Section -->
+<div class="relative z-10 px-10 pt-12 pb-8 border-b border-slate-100 dark:border-slate-800">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">health_metrics</span>
+</div>
+<div class="leading-none">
+<span class="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">VitalScan</span>
+<div class="h-1 w-full bg-primary mt-1"></div>
+</div>
+</div>
+<div class="text-right">
+<p class="text-xs font-bold text-primary uppercase tracking-widest">Report Identifier</p>
+<p class="text-lg font-mono font-bold text-slate-900 dark:text-white">{{REPORT_ID}}</p>
+<p class="text-xs text-slate-500 mt-1">Generated: {{REPORT_DATE}}</p>
+</div>
+</div>
+<div class="mt-10 text-center">
+<h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight uppercase">VitalScan Health Report</h2>
+<p class="text-slate-500 font-medium mt-1">Lifestyle Risk Intelligence &amp; Preventive Health Assessment</p>
+</div>
+</div>
+<!-- Main Content -->
+<div class="relative z-10 px-10 py-8 flex-1">
+<!-- Section 1: Patient Information -->
+<div class="mb-8">
+<div class="flex items-center gap-2 mb-4 border-b-2 border-primary/20 pb-1">
+<span class="material-symbols-outlined text-primary">person</span>
+<h3 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider">Patient Information</h3>
+</div>
+<div class="grid grid-cols-5 gap-4">
+<div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Age</p>
+<p class="text-lg font-bold">{{AGE}} <span class="text-xs font-normal">yrs</span></p>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Sex</p>
+<p class="text-lg font-bold">{{SEX}}</p>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Height</p>
+<p class="text-lg font-bold">{{HEIGHT}} <span class="text-xs font-normal">cm</span></p>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Weight</p>
+<p class="text-lg font-bold">{{WEIGHT}} <span class="text-xs font-normal">kg</span></p>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Waist</p>
+<p class="text-lg font-bold">{{WAIST}} <span class="text-xs font-normal">cm</span></p>
+</div>
+</div>
+</div>
+<!-- Section 2: Risk Assessment -->
+<div class="mb-8">
+<div class="flex items-center gap-2 mb-4 border-b-2 border-primary/20 pb-1">
+<span class="material-symbols-outlined text-primary">monitoring</span>
+<h3 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider">Risk Assessment</h3>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<div class="p-4 rounded-xl border-2" style="border-color:{{HEART_COLOR}}33; background-color:{{HEART_COLOR}}08;">
+<div class="flex items-center gap-1.5 mb-3">
+<span class="material-symbols-outlined text-base" style="color:{{HEART_COLOR}}">favorite</span>
+<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Heart Disease</span>
+</div>
+<p class="text-5xl font-black mb-1 leading-none" style="color:{{HEART_COLOR}}">{{HEART_RISK}}<span class="text-2xl">%</span></p>
+<div class="w-full rounded-full mb-2" style="height:6px; background:#e2e8f0;"><div class="rounded-full" style="height:6px; width:{{HEART_RISK}}%; background:{{HEART_COLOR}};"></div></div>
+<span class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:{{HEART_COLOR}}22; color:{{HEART_COLOR}}">{{HEART_LABEL}}</span>
+<div class="mt-3 space-y-1">{{HEART_FACTORS_HTML}}</div>
+</div>
+<div class="p-4 rounded-xl border-2" style="border-color:{{DIABETES_COLOR}}33; background-color:{{DIABETES_COLOR}}08;">
+<div class="flex items-center gap-1.5 mb-3">
+<span class="material-symbols-outlined text-base" style="color:{{DIABETES_COLOR}}">water_drop</span>
+<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Diabetes</span>
+</div>
+<p class="text-5xl font-black mb-1 leading-none" style="color:{{DIABETES_COLOR}}">{{DIABETES_RISK}}<span class="text-2xl">%</span></p>
+<div class="w-full rounded-full mb-2" style="height:6px; background:#e2e8f0;"><div class="rounded-full" style="height:6px; width:{{DIABETES_RISK}}%; background:{{DIABETES_COLOR}};"></div></div>
+<span class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:{{DIABETES_COLOR}}22; color:{{DIABETES_COLOR}}">{{DIABETES_LABEL}}</span>
+<div class="mt-3 space-y-1">{{DIABETES_FACTORS_HTML}}</div>
+</div>
+<div class="p-4 rounded-xl border-2" style="border-color:{{OBESITY_COLOR}}33; background-color:{{OBESITY_COLOR}}08;">
+<div class="flex items-center gap-1.5 mb-3">
+<span class="material-symbols-outlined text-base" style="color:{{OBESITY_COLOR}}">scale</span>
+<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Obesity</span>
+</div>
+<p class="text-5xl font-black mb-1 leading-none" style="color:{{OBESITY_COLOR}}">{{OBESITY_RISK}}<span class="text-2xl">%</span></p>
+<div class="w-full rounded-full mb-2" style="height:6px; background:#e2e8f0;"><div class="rounded-full" style="height:6px; width:{{OBESITY_RISK}}%; background:{{OBESITY_COLOR}};"></div></div>
+<span class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:{{OBESITY_COLOR}}22; color:{{OBESITY_COLOR}}">{{OBESITY_LABEL}}</span>
+<div class="mt-3 space-y-1">{{OBESITY_FACTORS_HTML}}</div>
+</div>
+</div>
+</div>
+<!-- Section 3: Body Metrics &amp; Health History -->
+<div class="grid grid-cols-2 gap-8 mb-8">
+<div>
+<div class="flex items-center gap-2 mb-4 border-b-2 border-primary/20 pb-1">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<h3 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider">Body Metrics</h3>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center p-3 bg-primary/5 rounded-lg">
+<span class="font-medium">BMI (Body Mass Index)</span>
+<span class="font-bold text-primary">{{BMI_VALUE}} <span class="text-xs font-normal text-slate-500 ml-1">{{BMI_CATEGORY}}</span></span>
+</div>
+<div class="flex justify-between items-center p-3 bg-primary/5 rounded-lg">
+<span class="font-medium">Waist to Height Ratio</span>
+<span class="font-bold text-primary">{{WHR_VALUE}} <span class="text-xs font-normal text-slate-500 ml-1">{{WHR_CATEGORY}}</span></span>
+</div>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-4 border-b-2 border-primary/20 pb-1">
+<span class="material-symbols-outlined text-primary">history</span>
+<h3 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider">Health History</h3>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-sm">
+<span class="text-slate-500">Family Heart Disease</span>
+{{FAMILY_HEART_HTML}}
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500">Family Diabetes History</span>
+<span class="font-semibold">{{FAMILY_DIAB}}</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500">Chest Discomfort</span>
+<span class="font-semibold">{{CHEST_DISCOMFORT}}</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500">Excessive Thirst</span>
+<span class="font-semibold">{{EXCESSIVE_THIRST}}</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 3: Lifestyle & Diet -->
+<div class="grid grid-cols-2 gap-8 mb-8">
+<div>
+<div class="flex items-center gap-2 mb-4 border-b-2 border-primary/20 pb-1">
+<span class="material-symbols-outlined text-primary">directions_run</span>
+<h3 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider">Lifestyle</h3>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="border border-slate-100 dark:border-slate-800 p-2 rounded">
+<p class="text-[10px] text-slate-400 uppercase font-bold">Physical Activity</p>
+<p class="text-sm font-semibold">{{ACTIVITY_LABEL}}</p>
+</div>
+<div class="border border-slate-100 dark:border-slate-800 p-2 rounded">
+<p class="text-[10px] text-slate-400 uppercase font-bold">Sleep Hours</p>
+<p class="text-sm font-semibold">{{SLEEP_HOURS}} hrs/night</p>
+</div>
+<div class="border border-slate-100 dark:border-slate-800 p-2 rounded">
+<p class="text-[10px] text-slate-400 uppercase font-bold">Stress Level</p>
+<p class="text-sm font-semibold" style="{{STRESS_COLOR_STYLE}}">{{STRESS_LABEL}}</p>
+</div>
+<div class="border border-slate-100 dark:border-slate-800 p-2 rounded">
+<p class="text-[10px] text-slate-400 uppercase font-bold">Smoking Status</p>
+<p class="text-sm font-semibold">{{SMOKING_LABEL}}</p>
+</div>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-4 border-b-2 border-primary/20 pb-1">
+<span class="material-symbols-outlined text-primary">restaurant</span>
+<h3 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider">Dietary Intake</h3>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2">
+<div style="flex:1; height:6px; border-radius:9999px; overflow:hidden; background:#e2e8f0;"><div style="height:6px; border-radius:9999px; background:#11c4d4; width:{{FRIED_BAR_WIDTH}};"></div></div>
+<span class="text-[10px]" style="width:7rem; color:#64748b;">Fried Foods: {{FRIED_LABEL}}</span>
+</div>
+<div class="flex items-center gap-2">
+<div style="flex:1; height:6px; border-radius:9999px; overflow:hidden; background:#e2e8f0;"><div style="height:6px; border-radius:9999px; background:#11c4d4; width:{{SALT_BAR_WIDTH}};"></div></div>
+<span class="text-[10px]" style="width:7rem; color:#64748b;">Salt Intake: {{SALT_LABEL}}</span>
+</div>
+<div class="flex items-center gap-2">
+<div style="flex:1; height:6px; border-radius:9999px; overflow:hidden; background:#e2e8f0;"><div style="height:6px; border-radius:9999px; background:#11c4d4; width:{{SUGAR_BAR_WIDTH}};"></div></div>
+<span class="text-[10px]" style="width:7rem; color:#64748b;">Sugar Intake: {{SUGAR_LABEL}}</span>
+</div>
+<div class="flex items-center gap-2">
+<div style="flex:1; height:6px; border-radius:9999px; overflow:hidden; background:#e2e8f0;"><div style="height:6px; border-radius:9999px; background:#11c4d4; width:{{WATER_BAR_WIDTH}};"></div></div>
+<span class="text-[10px]" style="width:7rem; color:#64748b;">Water: {{WATER_LABEL}}</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Plan -->
+<div class="mb-8">
+<div class="flex items-center gap-2 mb-4 border-b-2 border-primary/20 pb-1">
+<span class="material-symbols-outlined text-primary">checklist</span>
+<h3 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider">Recommended Action Plan</h3>
+</div>
+<div class="space-y-2">{{ACTION_PLAN_HTML}}</div>
+</div>
+<!-- Health Summary Box -->
+<div class="bg-slate-900 text-white p-6 rounded-xl relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl">verified_user</span>
+</div>
+<h4 class="text-primary font-bold uppercase tracking-widest text-xs mb-2">Automated Risk Intelligence Summary</h4>
+<p class="text-sm leading-relaxed text-slate-300">
+                    {{SUMMARY_TEXT}}
+                </p>
+</div>
+</div>
+<!-- Footer -->
+<div class="mt-auto px-10 py-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
+<div class="flex justify-between items-end">
+<div class="max-w-md">
+<p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Medical Disclaimer</p>
+<p class="text-[9px] text-slate-500 leading-tight">
+                        This VitalScan report is for educational and wellness purposes only. It does not constitute a clinical medical diagnosis or treatment plan. Information provided is based on self-reported data and basic biometric screening. Always consult with a licensed healthcare professional for medical advice and before making significant changes to your health regimen.
+                    </p>
+</div>
+<div class="text-right">
+<div class="flex gap-4 mb-2 justify-end">
+<div class="text-center">
+<p class="text-[8px] font-bold text-slate-400">ENCRYPTION</p>
+<span class="material-symbols-outlined text-primary text-lg">lock</span>
+</div>
+<div class="text-center">
+<p class="text-[8px] font-bold text-slate-400">CERTIFIED</p>
+<span class="material-symbols-outlined text-primary text-lg">verified</span>
+</div>
+</div>
+<p class="text-[10px] text-slate-400">© {{REPORT_YEAR}} VitalScan Health Intelligence Labs</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Component (Mobile Preview Mock) -->
+</body></html>

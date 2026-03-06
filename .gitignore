@@ -1,0 +1,46 @@
+# ── Node / Frontend ────────────────────────────────────
+node_modules/
+dist/
+.vite/
+*.local
+
+# ── Python / Backend ───────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+venv/
+.venv/
+env/
+ENV/
+
+# ── Environment variables ──────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── IDEs & OS ──────────────────────────────────────────
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────────────────────
+*.log
+npm-debug.log*
+
+# ── Coverage / Test artifacts ──────────────────────────
+coverage/
+htmlcov/
+.pytest_cache/
+
+# ── Large ML dataset files (exceed GitHub 100 MB limit) ──
+vitalscan/ml/*.csv
+vitalscan/ml/*.xls
+vitalscan/ml/*.xlsx

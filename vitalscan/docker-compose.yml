@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:8000
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://vitalscan:password@postgres:5432/vitalscan
+      - REDIS_URL=redis://redis:6379
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: vitalscan
+      POSTGRES_USER: vitalscan
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  postgres_data:
