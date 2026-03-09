@@ -14,97 +14,119 @@ import {
 // ── USER PROFILE ─────────────────────────────────
 
 export async function createUserProfile(userId, userData) {
-  const encrypted = encryptProfile({
-    ...userData,
-    createdAt: serverTimestamp(),
-  });
-  await setDoc(doc(db, 'users', userId), encrypted);
+  try {
+    const encrypted = encryptProfile({
+      ...userData,
+      createdAt: serverTimestamp(),
+    });
+    await setDoc(doc(db, 'users', userId), encrypted);
+  } catch { return null; }
 }
 
 export async function getUserProfile(userId) {
-  const snap = await getDoc(doc(db, 'users', userId));
-  if (!snap.exists()) return null;
-  return decryptProfile(snap.data());
+  try {
+    const snap = await getDoc(doc(db, 'users', userId));
+    if (!snap.exists()) return null;
+    return decryptProfile(snap.data());
+  } catch { return null; }
 }
 
 export async function updateUserProfile(userId, updates) {
-  const current = await getUserProfile(userId);
-  const merged = { ...current, ...updates };
-  const encrypted = encryptProfile(merged);
-  await updateDoc(doc(db, 'users', userId), encrypted);
+  try {
+    const current = await getUserProfile(userId);
+    const merged = { ...(current || {}), ...updates };
+    const encrypted = encryptProfile(merged);
+    await updateDoc(doc(db, 'users', userId), encrypted);
+  } catch { return null; }
 }
 
 // ── ASSESSMENTS ─────────────────────────────────
 
 export async function saveAssessment(userId, data) {
-  const encrypted = encryptAssessment({
-    userId,
-    heartRisk: data.heartRisk,
-    diabetesRisk: data.diabetesRisk,
-    obesityRisk: data.obesityRisk,
-    inputs: data.inputs || {},
-    createdAt: serverTimestamp(),
-  });
-  const ref = await addDoc(collection(db, 'assessments'), encrypted);
-  return ref.id;
+  try {
+    const encrypted = encryptAssessment({
+      userId,
+      heartRisk: data.heartRisk,
+      diabetesRisk: data.diabetesRisk,
+      obesityRisk: data.obesityRisk,
+      inputs: data.inputs || {},
+      createdAt: serverTimestamp(),
+    });
+    const ref = await addDoc(collection(db, 'assessments'), encrypted);
+    return ref.id;
+  } catch { return null; }
 }
 
 export async function getUserAssessments(userId) {
-  const q = query(
-    collection(db, 'assessments'),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({
-    id: d.id,
-    ...decryptAssessment(d.data()),
-  }));
+  try {
+    const q = query(
+      collection(db, 'assessments'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({
+      id: d.id,
+      ...decryptAssessment(d.data()),
+    }));
+  } catch { return []; }
 }
 
 export async function deleteAllAssessments(userId) {
-  const q = query(collection(db, 'assessments'), where('userId', '==', userId));
-  const snap = await getDocs(q);
-  const batch = writeBatch(db);
-  snap.docs.forEach((d) => batch.delete(d.ref));
-  await batch.commit();
+  try {
+    const q = query(collection(db, 'assessments'), where('userId', '==', userId));
+    const snap = await getDocs(q);
+    const batch = writeBatch(db);
+    snap.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+  } catch { return null; }
 }
 
 // ── EMERGENCY CONTACTS ────────────────────────────
 
 export async function saveEmergencyContacts(userId, contacts) {
-  const encrypted = encryptContacts(contacts);
-  await setDoc(doc(db, 'emergency_contacts', userId), {
-    userId,
-    contacts: encrypted,
-  });
+  try {
+    const encrypted = encryptContacts(contacts);
+    await setDoc(doc(db, 'emergency_contacts', userId), {
+      userId,
+      contacts: encrypted,
+    });
+  } catch { return null; }
 }
 
 export async function getEmergencyContacts(userId) {
-  const snap = await getDoc(doc(db, 'emergency_contacts', userId));
-  if (!snap.exists()) return [];
-  return decryptContacts(snap.data().contacts || []);
+  try {
+    const snap = await getDoc(doc(db, 'emergency_contacts', userId));
+    if (!snap.exists()) return [];
+    return decryptContacts(snap.data().contacts || []);
+  } catch { return []; }
 }
 
 // ── SETTINGS ───────────────────────────────────
 
 export async function saveUserSettings(userId, settings) {
-  await setDoc(doc(db, 'user_settings', userId), { ...settings, userId });
+  try {
+    await setDoc(doc(db, 'user_settings', userId), { ...settings, userId });
+  } catch { return null; }
 }
 
 export async function getUserSettings(userId) {
-  const snap = await getDoc(doc(db, 'user_settings', userId));
-  if (!snap.exists()) return null;
-  return snap.data();
+  try {
+    const snap = await getDoc(doc(db, 'user_settings', userId));
+    if (!snap.exists()) return null;
+    return snap.data();
+  } catch { return null; }
 }
 
 // ── ACCOUNT DELETION ─────────────────────────────
 
 export async function deleteAllUserData(userId) {
-  await deleteAllAssessments(userId);
-  const batch = writeBatch(db);
-  batch.delete(doc(db, 'users', userId));
-  batch.delete(doc(db, 'emergency_contacts', userId));
-  batch.delete(doc(db, 'user_settings', userId));
-  await batch.commit();
+  try {
+    await deleteAllAssessments(userId);
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'users', userId));
+    batch.delete(doc(db, 'emergency_contacts', userId));
+    batch.delete(doc(db, 'user_settings', userId));
+    await batch.commit();
+  } catch { return null; }
 }

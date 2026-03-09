@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FiTrendingDown, FiTrendingUp, FiMinus } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
-import { useAppContext } from '../../context/AppContext';
 import { getUserAssessments } from '../../services/firestoreService';
 import { generateVitalScanReport } from '../../utils/generateReport';
 
@@ -42,6 +42,58 @@ function formatDate(ts) {
     year: 'numeric',
   }) + ' · ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
+
+function TrendBadge({ diff }) {
+  if (diff === 0 || diff === null || diff === undefined) {
+    return (
+      <span className="flex items-center gap-0.5 text-[11px] font-semibold text-gray-400">
+        <FiMinus size={11} /> No change
+      </span>
+    );
+  }
+  if (diff < 0) {
+    return (
+      <span className="flex items-center gap-0.5 text-[11px] font-semibold text-green-400">
+        <FiTrendingDown size={11} /> {diff}%
+      </span>
+    );
+  }
+  return (
+    <span className="flex items-center gap-0.5 text-[11px] font-semibold text-red-400">
+      <FiTrendingUp size={11} /> +{diff}%
+    </span>
+  );
+}
+
+function TrendSection({ latest, previous }) {
+  const heart = (latest.heartRisk || 0) - (previous.heartRisk || 0);
+  const diab = (latest.diabetesRisk || 0) - (previous.diabetesRisk || 0);
+  const obes = (latest.obesityRisk || 0) - (previous.obesityRisk || 0);
+
+  return (
+    <div
+      className="rounded-2xl p-5 mb-6"
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+    >
+      <p className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: 'var(--text-muted)' }}>
+        📈 Trend vs Previous Assessment
+      </p>
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: '❤️ Heart', diff: heart },
+          { label: '🩸 Diabetes', diff: diab },
+          { label: '⚖️ Obesity', diff: obes },
+        ].map(({ label, diff }) => (
+          <div key={label} className="text-center">
+            <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>{label}</p>
+            <TrendBadge diff={diff} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
 function AssessmentCard({ assessment, onView, onDownload }) {
   const [downloading, setDownloading] = useState(false);
@@ -115,7 +167,6 @@ function AssessmentCard({ assessment, onView, onDownload }) {
 export default function PreviousAssessmentsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { dispatch } = useAppContext();
 
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -138,13 +189,12 @@ export default function PreviousAssessmentsPage() {
   });
 
   const handleView = (assessment) => {
-    // Load the assessment data into AppContext, then navigate to results
-    dispatch({ type: 'SET_RESULTS', payload: {
+    const results = {
       heartRisk: assessment.heartRisk,
       diabetesRisk: assessment.diabetesRisk,
       obesityRisk: assessment.obesityRisk,
-    }});
-    navigate('/results');
+    };
+    navigate('/dashboard/results', { state: { results, inputs: assessment.inputs || {} } });
   };
 
   const handleDownload = async (assessment) => {
@@ -205,7 +255,7 @@ export default function PreviousAssessmentsPage() {
           </p>
           {assessments.length === 0 && (
             <button
-              onClick={() => navigate('/assessment')}
+              onClick={() => navigate('/dashboard/new')}
               className="px-6 py-3 rounded-xl bg-neon-500 hover:bg-neon-400 text-darkbg font-bold text-sm transition-colors"
             >
               Start Assessment →
@@ -214,6 +264,10 @@ export default function PreviousAssessmentsPage() {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* Trend section — shown when there are 2+ assessments */}
+          {assessments.length >= 2 && filter === 'All' && (
+            <TrendSection latest={assessments[0]} previous={assessments[1]} />
+          )}
           <AnimatePresence>
             {filtered.map((a) => (
               <AssessmentCard

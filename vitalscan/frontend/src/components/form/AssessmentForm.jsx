@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
 import useRiskPrediction from '../../hooks/useRiskPrediction';
 import LoadingPulse from '../ui/LoadingPulse';
+import { validateForm } from '../../utils/validateForm';
 import {
   FiMic, FiMicOff, FiCheck,
   FiUser, FiActivity, FiHeart, FiCoffee,
@@ -73,7 +74,7 @@ function MicButton({ field, onResult, speech }) {
   );
 }
 
-function NumField({ label, value, onChange, hint, speech, min, max, step }) {
+function NumField({ label, value, onChange, hint, speech, min, max, step, error }) {
   return (
     <div>
       <label className="block text-sm font-medium dark:text-darktext text-lighttext mb-1">{label}</label>
@@ -86,11 +87,12 @@ function NumField({ label, value, onChange, hint, speech, min, max, step }) {
           max={max}
           step={step}
           placeholder={hint}
-          className={inputCls + ' pr-10'}
+          className={inputCls + ' pr-10' + (error ? ' !border-red-500 focus:!border-red-500' : '')}
           required
         />
         <MicButton field={label} onResult={(v) => onChange(String(v))} speech={speech} />
       </div>
+      {error && <p className="text-red-400 text-xs mt-1">&#9888; {error}</p>}
     </div>
   );
 }
@@ -366,6 +368,7 @@ const defaultData = {
 export default function AssessmentForm() {
   const [form, setForm] = useState(defaultData);
   const [step, setStep] = useState(0);
+  const [formErrors, setFormErrors] = useState({});
   const [showSecondContact, setShowSecondContact] = useState(false);
   const { dispatch, state } = useAppContext();
   const { predict, loading } = useRiskPrediction();
@@ -400,8 +403,51 @@ export default function AssessmentForm() {
     [form.bedtime, form.wakeup_time]
   );
 
+  const formPayload = useMemo(() => ({
+    age: form.age,
+    sex: form.gender === 'Male' ? 1 : 0,
+    height_cm: form.height_cm,
+    weight_kg: form.weight_kg,
+    waist_cm: form.waist_cm,
+    physical_activity: form.physical_activity,
+    sleep_hours: sleepHours > 0 ? sleepHours : '',
+    stress_level: form.stress_level,
+    smoking_status: form.smoking,
+    fried_food: form.fried_food,
+    sugar_intake: form.sugar_intake,
+    salt_intake: form.salt_intake,
+    water_intake: form.water_intake,
+    family_history_heart: form.family_heart,
+    family_history_diab: form.family_diabetes,
+    chest_discomfort: form.chest_discomfort,
+    excessive_thirst: form.excessive_thirst,
+  }), [form, sleepHours]);
+
+  const handleBlur = (field, value) => {
+    const snap = { ...formPayload, [field]: value };
+    const { errors } = validateForm(snap);
+    setFormErrors((prev) => {
+      const next = { ...prev };
+      if (errors[field]) next[field] = errors[field];
+      else delete next[field];
+      return next;
+    });
+  };
+
   /* submit */
   const submit = async () => {
+    const { isValid, errors } = validateForm(formPayload);
+    if (!isValid) {
+      setFormErrors(errors);
+      const firstKey = Object.keys(errors)[0];
+      const el = document.getElementById(firstKey);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (errors.age || errors.sex) setStep(0);
+      else if (errors.height_cm || errors.weight_kg || errors.waist_cm || errors.physical_activity || errors.sleep_hours) setStep(1);
+      else setStep(2);
+      return;
+    }
+    setFormErrors({});
     const h = Number(form.height_cm);
     const w = Number(form.weight_kg);
     const waist = Number(form.waist_cm) || 80;
@@ -474,6 +520,19 @@ export default function AssessmentForm() {
     { value: '2', label: 'Often' },
   ];
 
+  const requiredFields = [
+    'age', 'sex', 'height_cm', 'weight_kg', 'waist_cm',
+    'physical_activity', 'sleep_hours', 'stress_level',
+    'smoking_status', 'fried_food', 'sugar_intake',
+    'salt_intake', 'water_intake',
+    'family_history_heart', 'family_history_diab',
+    'chest_discomfort', 'excessive_thirst',
+  ];
+  const filled = requiredFields.filter((f) => {
+    const v = formPayload[f];
+    return v !== '' && v !== null && v !== undefined;
+  }).length;
+
   const cardCls = 'dark:bg-darkcard bg-white border dark:border-darkborder border-lightborder rounded-2xl p-6 shadow-xl dark:shadow-none';
   const progress = ((step + 1) / stepLabels.length) * 100;
 
@@ -503,6 +562,16 @@ export default function AssessmentForm() {
             style={{ width: `${progress}%` }}
           />
         </div>
+        <div className="flex justify-between items-center mt-3 mb-1">
+          <span className="text-xs dark:text-darksub text-lightsub">{filled} of 17 fields complete</span>
+          <span className="text-xs font-medium" style={{ color: '#00DC78' }}>{Math.round((filled / 17) * 100)}%</span>
+        </div>
+        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a2e1e' }}>
+          <div
+            className="h-full rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${(filled / 17) * 100}%`, background: '#00DC78' }}
+          />
+        </div>
       </div>
 
       <AnimatePresence mode="wait">
@@ -520,7 +589,7 @@ export default function AssessmentForm() {
               <div className="grid sm:grid-cols-2 gap-5">
                 <TextField label="Full Name" value={form.name} onChange={(v) => update('name', v)} placeholder="Your name" speech={speech} />
                 <TextField label="Email" value={form.email} onChange={(v) => update('email', v)} type="email" placeholder="you@email.com" speech={speech} />
-                <NumField label="Age" value={form.age} onChange={(v) => update('age', v)} hint="yrs" speech={speech} min={1} max={120} step={1} />
+                <NumField label="Age" value={form.age} onChange={(v) => update('age', v)} onBlur={(e) => handleBlur('age', e.target.value)} hint="yrs" speech={speech} min={1} max={120} step={1} error={formErrors.age} fieldId="age" />
                 <PillToggle
                   label="Sex"
                   value={form.gender}
@@ -537,9 +606,9 @@ export default function AssessmentForm() {
               <div className={cardCls}>
                 <SectionHeader icon={FiActivity} title="Body Vitals" />
                 <div className="grid sm:grid-cols-2 gap-5">
-                  <NumField label="Height" value={form.height_cm} onChange={(v) => update('height_cm', v)} hint="cm" speech={speech} min={50} max={300} step={1} />
-                  <NumField label="Weight" value={form.weight_kg} onChange={(v) => update('weight_kg', v)} hint="kg" speech={speech} min={20} max={500} step={0.1} />
-                  <NumField label="Waist" value={form.waist_cm} onChange={(v) => update('waist_cm', v)} hint="cm" speech={speech} min={30} max={200} step={1} />
+                  <NumField label="Height" value={form.height_cm} onChange={(v) => update('height_cm', v)} onBlur={(e) => handleBlur('height_cm', e.target.value)} hint="cm" speech={speech} min={50} max={300} step={1} error={formErrors.height_cm} fieldId="height_cm" />
+                  <NumField label="Weight" value={form.weight_kg} onChange={(v) => update('weight_kg', v)} onBlur={(e) => handleBlur('weight_kg', e.target.value)} hint="kg" speech={speech} min={20} max={500} step={0.1} error={formErrors.weight_kg} fieldId="weight_kg" />
+                  <NumField label="Waist" value={form.waist_cm} onChange={(v) => update('waist_cm', v)} onBlur={(e) => handleBlur('waist_cm', e.target.value)} hint="cm" speech={speech} min={30} max={200} step={1} error={formErrors.waist_cm} fieldId="waist_cm" />
                   {/* BMI read-only */}
                   <div>
                     <label className="block text-sm font-medium dark:text-darktext text-lighttext mb-1">BMI</label>
@@ -699,19 +768,49 @@ export default function AssessmentForm() {
         {step < stepLabels.length - 1 ? (
           <button
             type="button"
-            onClick={() => setStep((s) => s + 1)}
+            onClick={() => {
+              const { errors: allE } = validateForm(formPayload);
+              const stepFields = step === 0
+                ? ['age', 'sex']
+                : ['height_cm', 'weight_kg', 'waist_cm', 'physical_activity', 'sleep_hours'];
+              const stepErrors = {};
+              stepFields.forEach((f) => { if (allE[f]) stepErrors[f] = allE[f]; });
+              if (Object.keys(stepErrors).length > 0) { setFormErrors(stepErrors); return; }
+              setFormErrors({});
+              setStep((s) => s + 1);
+            }}
             className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-darkbg font-semibold transition-colors"
           >
             Next <FiArrowRight size={16} />
           </button>
         ) : (
-          <button
-            type="button"
-            onClick={submit}
-            className="flex-1 py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-darkbg font-bold text-base transition-colors"
-          >
-            Submit &amp; Analyze
-          </button>
+          Object.keys(formErrors).length > 0 ? (
+            <button
+              type="button"
+              onClick={submit}
+              style={{ opacity: 0.7 }}
+              className="flex-1 py-3.5 rounded-xl bg-primary text-darkbg font-bold text-base transition-colors"
+            >
+              ⚠ Fix {Object.keys(formErrors).length} errors to continue
+            </button>
+          ) : filled < 17 ? (
+            <button
+              type="button"
+              onClick={submit}
+              style={{ opacity: 0.7 }}
+              className="flex-1 py-3.5 rounded-xl bg-primary text-darkbg font-bold text-base transition-colors"
+            >
+              Fill all fields to continue ({17 - filled} remaining)
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={submit}
+              className="flex-1 py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-darkbg font-bold text-base transition-colors"
+            >
+              Analyze My Risk →
+            </button>
+          )
         )}
       </div>
     </div>

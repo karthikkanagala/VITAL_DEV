@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Dashboard from '../components/results/Dashboard';
 import { generateVitalScanReport } from '../utils/generateReport';
 import { useAuth } from '../context/AuthContext';
-import { sendEmergencyAlert } from '../services/emailService';
+import { sendEmergencyAlert, sendResultsEmail } from '../services/emailService';
 import { saveAssessment, getEmergencyContacts } from '../services/firestoreService';
 import { FiArrowLeft } from 'react-icons/fi';
 
@@ -15,8 +15,10 @@ export default function ResultsPage() {
   const [downloading, setDownloading] = useState(false);
   const [alertSent, setAlertSent] = useState(false);
   const [hasContacts, setHasContacts] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const savedRef = useRef(false);
   const alertRef = useRef(false);
+  const emailRef = useRef(false);
 
   const needsAlert = state.results && (
     state.results.heartRisk >= 70 ||
@@ -63,6 +65,20 @@ export default function ResultsPage() {
         inputs: state.formData || {},
       }).catch(() => {});
     }
+  }, [state.results]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Send results email once (real users only)
+  useEffect(() => {
+    if (!state.results || isDemo || !user || emailRef.current) return;
+    emailRef.current = true;
+    sendResultsEmail(user, state.results, state.results.actionPlan)
+      .then((res) => {
+        if (res) {
+          setEmailSent(true);
+          setTimeout(() => setEmailSent(false), 5000);
+        }
+      })
+      .catch(() => {});
   }, [state.results]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!state.results) return null;
@@ -153,6 +169,18 @@ export default function ResultsPage() {
               </Link>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Results emailed banner */}
+      {emailSent && !isDemo && (
+        <div
+          id="email-banner"
+          className="max-w-7xl mx-auto mb-4 flex items-center gap-3 rounded-xl px-5 py-3 border text-sm font-medium"
+          style={{ background: '#0a1f0e', borderColor: '#00DC78', color: '#00DC78' }}
+        >
+          <span>✅</span>
+          <span>Results emailed to <strong>{user?.email}</strong></span>
         </div>
       )}
 

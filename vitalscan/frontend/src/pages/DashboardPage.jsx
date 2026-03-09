@@ -1,35 +1,29 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiUser, FiAlertTriangle, FiBarChart2, FiPlusCircle, FiSettings, FiLogOut } from 'react-icons/fi';
+import { FiHome, FiUser, FiAlertTriangle, FiBarChart2, FiPlusCircle, FiSettings, FiLogOut } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import UserProfilePage from './dashboard/UserProfilePage';
-import EmergencyContactsPage from './dashboard/EmergencyContactsPage';
-import PreviousAssessmentsPage from './dashboard/PreviousAssessmentsPage';
-import SettingsPage from './dashboard/SettingsPage';
 
 const NAV_ITEMS = [
-  { id: 'profile', label: 'Profile', icon: FiUser },
-  { id: 'emergency', label: 'Emergency Contacts', icon: FiAlertTriangle },
-  { id: 'assessments', label: 'My Assessments', icon: FiBarChart2 },
-  { id: 'new', label: 'New Assessment', icon: FiPlusCircle },
+  { id: 'overview',    label: 'Overview',            icon: FiHome,         path: '/dashboard' },
+  { id: 'profile',     label: 'Profile',             icon: FiUser,         path: '/dashboard/profile' },
+  { id: 'emergency',   label: 'Emergency Contacts',  icon: FiAlertTriangle, path: '/dashboard/emergency' },
+  { id: 'assessments', label: 'My Assessments',      icon: FiBarChart2,    path: '/dashboard/assessments' },
+  { id: 'new',         label: 'New Assessment',      icon: FiPlusCircle,   path: '/dashboard/new' },
 ];
 
 const BOTTOM_ITEMS = [
-  { id: 'settings', label: 'Settings', icon: FiSettings },
+  { id: 'settings', label: 'Settings', icon: FiSettings, path: '/dashboard/settings' },
 ];
 
-function Sidebar({ active, setActive }) {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+function isNavActive(pathname, path) {
+  if (path === '/dashboard') return pathname === '/dashboard' || pathname === '/dashboard/';
+  return pathname.startsWith(path);
+}
 
-  const handleNav = (id) => {
-    if (id === 'new') {
-      navigate('/assessment');
-    } else {
-      setActive(id);
-    }
-  };
+function Sidebar() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -75,30 +69,30 @@ function Sidebar({ active, setActive }) {
 
       {/* Main nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-          const isActive = active === id;
+        {NAV_ITEMS.map(({ id, label, icon: Icon, path }) => {
+          const active = isNavActive(pathname, path);
           return (
             <button
               key={id}
-              onClick={() => handleNav(id)}
+              onClick={() => navigate(path)}
               className="w-full flex items-center gap-3 text-sm transition-all duration-150 rounded-r-lg"
               style={{
                 padding: '12px 20px',
-                paddingLeft: isActive ? 17 : 20,
-                borderLeft: isActive ? '3px solid #00DC78' : '3px solid transparent',
-                background: isActive ? '#0d2010' : 'transparent',
-                color: isActive ? '#00DC78' : '#666',
-                fontWeight: isActive ? 600 : 400,
+                paddingLeft: active ? 17 : 20,
+                borderLeft: active ? '3px solid #00DC78' : '3px solid transparent',
+                background: active ? '#0d2010' : 'transparent',
+                color: active ? '#00DC78' : '#666',
+                fontWeight: active ? 600 : 400,
                 textAlign: 'left',
               }}
               onMouseEnter={(e) => {
-                if (!isActive) {
+                if (!active) {
                   e.currentTarget.style.background = '#111a12';
                   e.currentTarget.style.color = '#00DC78';
                 }
               }}
               onMouseLeave={(e) => {
-                if (!isActive) {
+                if (!active) {
                   e.currentTarget.style.background = 'transparent';
                   e.currentTarget.style.color = '#666';
                 }
@@ -113,30 +107,30 @@ function Sidebar({ active, setActive }) {
 
       {/* Bottom nav */}
       <div className="px-3 pb-4 space-y-1 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
-        {BOTTOM_ITEMS.map(({ id, label, icon: Icon }) => {
-          const isActive = active === id;
+        {BOTTOM_ITEMS.map(({ id, label, icon: Icon, path }) => {
+          const active = isNavActive(pathname, path);
           return (
             <button
               key={id}
-              onClick={() => setActive(id)}
+              onClick={() => navigate(path)}
               className="w-full flex items-center gap-3 text-sm transition-all duration-150 rounded-r-lg"
               style={{
                 padding: '12px 20px',
-                paddingLeft: isActive ? 17 : 20,
-                borderLeft: isActive ? '3px solid #00DC78' : '3px solid transparent',
-                background: isActive ? '#0d2010' : 'transparent',
-                color: isActive ? '#00DC78' : '#666',
-                fontWeight: isActive ? 600 : 400,
+                paddingLeft: active ? 17 : 20,
+                borderLeft: active ? '3px solid #00DC78' : '3px solid transparent',
+                background: active ? '#0d2010' : 'transparent',
+                color: active ? '#00DC78' : '#666',
+                fontWeight: active ? 600 : 400,
                 textAlign: 'left',
               }}
               onMouseEnter={(e) => {
-                if (!isActive) {
+                if (!active) {
                   e.currentTarget.style.background = '#111a12';
                   e.currentTarget.style.color = '#00DC78';
                 }
               }}
               onMouseLeave={(e) => {
-                if (!isActive) {
+                if (!active) {
                   e.currentTarget.style.background = 'transparent';
                   e.currentTarget.style.color = '#666';
                 }
@@ -175,29 +169,22 @@ function Sidebar({ active, setActive }) {
 }
 
 export default function DashboardPage() {
-  const [active, setActive] = useState('profile');
-
-  const pages = {
-    profile: <UserProfilePage />,
-    emergency: <EmergencyContactsPage />,
-    assessments: <PreviousAssessmentsPage />,
-    settings: <SettingsPage />,
-  };
+  const { pathname } = useLocation();
 
   return (
     <div className="flex min-h-screen dark:bg-darkbg bg-lightbg pt-16">
       {/* Left sidebar */}
-      <Sidebar active={active} setActive={setActive} />
+      <Sidebar />
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto p-8" style={{ minWidth: 0 }}>
         <motion.div
-          key={active}
+          key={pathname}
           initial={{ opacity: 0, x: 12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.2 }}
         >
-          {pages[active] || <UserProfilePage />}
+          <Outlet />
         </motion.div>
       </main>
     </div>

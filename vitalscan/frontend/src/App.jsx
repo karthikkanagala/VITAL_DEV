@@ -10,6 +10,13 @@ import ResultsPage from './pages/ResultsPage';
 import AboutPage from './pages/AboutPage';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
+import DashboardOverview from './pages/dashboard/DashboardOverview';
+import UserProfilePage from './pages/dashboard/UserProfilePage';
+import EmergencyContactsPage from './pages/dashboard/EmergencyContactsPage';
+import PreviousAssessmentsPage from './pages/dashboard/PreviousAssessmentsPage';
+import DashboardAssessmentForm from './pages/dashboard/DashboardAssessmentForm';
+import DashboardResultsView from './pages/dashboard/DashboardResultsView';
+import SettingsPage from './pages/dashboard/SettingsPage';
 
 function ProtectedRoute({ children }) {
   const { user, userLoading } = useAuth();
@@ -38,7 +45,18 @@ function AppShell() {
           <Route path="/assessment" element={<ProtectedRoute><AssessmentPage /></ProtectedRoute>} />
           <Route path="/results" element={<ProtectedRoute><ResultsPage /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route
+            path="/dashboard"
+            element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
+          >
+            <Route index element={<DashboardOverview />} />
+            <Route path="profile" element={<UserProfilePage />} />
+            <Route path="emergency" element={<EmergencyContactsPage />} />
+            <Route path="assessments" element={<PreviousAssessmentsPage />} />
+            <Route path="new" element={<DashboardAssessmentForm />} />
+            <Route path="results" element={<DashboardResultsView />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
         </Routes>
       </main>
       {!isDashboard && <Footer />}

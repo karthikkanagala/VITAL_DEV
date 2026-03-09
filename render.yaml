@@ -1,0 +1,218 @@
+# =============================================================================
+#  VITALSCAN — RENDER DEPLOYMENT BLUEPRINT
+#  render.yaml
+# =============================================================================
+#
+#  WHAT IS THIS FILE?
+#  ------------------
+#  This file tells Render.com exactly how to build and run VitalScan.
+#  Render reads it automatically when you connect your GitHub repo.
+#  You do NOT need to configure anything manually on the Render dashboard
+#  except for the secret keys (Firebase, EmailJS, etc.).
+#
+#
+#  STEP-BY-STEP DEPLOYMENT GUIDE (for beginners)
+#  -----------------------------------------------
+#
+#  BEFORE YOU START — do these 3 things:
+#
+#  1. Push your code to GitHub
+#     - Create a free account at https://github.com
+#     - Create a new repository (e.g. "vitalscan")
+#     - In your project folder run these commands in the terminal:
+#
+#         git init
+#         git add .
+#         git commit -m "first commit"
+#         git branch -M main
+#         git remote add origin https://github.com/YOUR_USERNAME/vitalscan.git
+#         git push -u origin main
+#
+#  2. Create a free Render account
+#     - Go to https://render.com and sign up (it is free)
+#     - Connect your GitHub account when prompted
+#
+#  3. Deploy using this Blueprint file
+#     - In the Render dashboard click  "New +"  →  "Blueprint"
+#     - Select your GitHub repo (vitalscan)
+#     - Render will find this render.yaml file and create both services for you
+#     - Click "Apply"
+#
+#
+#  AFTER DEPLOYMENT — update 2 environment variables:
+#
+#  Step A: Find your backend URL
+#     - In Render dashboard → click on "vitalscan-api" service
+#     - Copy the URL shown at the top  (e.g. https://vitalscan-api.onrender.com)
+#
+#  Step B: Update the frontend's VITE_API_URL
+#     - In Render dashboard → click on "vitalscan" (frontend) service
+#     - Click "Environment" in the left sidebar
+#     - Find VITE_API_URL and set it to:
+#         https://vitalscan-api.onrender.com/api
+#       (paste your actual backend URL + /api at the end)
+#     - Click "Save Changes" → then click "Manual Deploy" → "Deploy latest commit"
+#
+#  Step C: Update the backend's CORS_ORIGINS
+#     - In Render dashboard → click on "vitalscan-api" (backend) service
+#     - Click "Environment" in the left sidebar
+#     - Find CORS_ORIGINS and set it to your frontend URL:
+#         https://vitalscan.onrender.com
+#       (or whatever URL Render assigned to your frontend)
+#     - Click "Save Changes" → then click "Manual Deploy" → "Deploy latest commit"
+#
+#  Step D: Add your secret keys to the frontend service
+#     - In Render dashboard → "vitalscan" frontend → "Environment"
+#     - Add each key listed below under "Firebase" and "EmailJS"
+#     - Copy the values from your local frontend/.env file
+#     - Click "Save Changes" and redeploy
+#
+#
+#  FREE TIER NOTE:
+#  Render's free web services go to sleep after 15 minutes of no traffic.
+#  The first request after sleep takes ~30 seconds (model is loading).
+#  This is normal on the free plan. To keep it always awake, upgrade to
+#  the "Starter" paid plan ($7/month) on the backend service only.
+#
+# =============================================================================
+
+services:
+
+  # ===========================================================================
+  #  SERVICE 1: BACKEND  (FastAPI + Python + ML Model)
+  # ===========================================================================
+  #
+  #  This is the brain of VitalScan — it runs our AI model and returns
+  #  heart, diabetes, and obesity risk scores.
+  #
+  #  Render will:
+  #   1. Check out your code from GitHub
+  #   2. Go into the "backend" folder
+  #   3. Run the buildCommand (installs Python packages + trains model)
+  #   4. Run the startCommand to start the API server
+  #
+  - type: web
+    name: vitalscan-api        # This becomes the subdomain: vitalscan-api.onrender.com
+    runtime: python            # Tells Render to use Python
+    rootDir: vitalscan/backend # All commands run from inside the vitalscan/backend/ folder
+
+    # Install all Python packages listed in requirements.txt,
+    # then run the training script to create gradient_boosting_model.pkl
+    # NOTE: if the .pkl file is already committed to GitHub, you can
+    # remove "python ../../ml/gradient_training.py" from this line to save time.
+    buildCommand: pip install -r requirements.txt && python ../../ml/gradient_training.py
+
+    # Start the FastAPI server. Render provides $PORT automatically — do not hardcode it.
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+    # Render checks this URL every few minutes to make sure the server is alive.
+    healthCheckPath: /api/health
+
+    envVars:
+      # Path to the trained ML model file.
+      # This path is relative to the vitalscan/backend/ folder (where the server runs).
+      - key: MODEL_PATH
+        value: ../../ml/gradient_boosting_model.pkl
+
+      # List of websites allowed to call this API.
+      # IMPORTANT: After deploying the frontend, replace this with your
+      # actual frontend URL from Render (e.g. https://vitalscan.onrender.com).
+      # If you have multiple URLs, separate them with a comma:
+      #   https://vitalscan.onrender.com,https://www.yourdomain.com
+      - key: CORS_ORIGINS
+        value: https://vitalscan.onrender.com
+
+      # Redis cache URL — optional. Leave this empty for now.
+      # Only needed if you add a Redis add-on in the Render dashboard.
+      - key: REDIS_URL
+        sync: false
+
+  # ===========================================================================
+  #  SERVICE 2: FRONTEND  (React + Vite — Static Website)
+  # ===========================================================================
+  #
+  #  This is the website users see in their browser.
+  #
+  #  Render will:
+  #   1. Go into the "frontend" folder
+  #   2. Run npm install (downloads all JavaScript packages)
+  #   3. Run npm run build (creates the final website files in the dist/ folder)
+  #   4. Serve everything inside dist/ as a static website
+  #
+  - type: web
+    name: vitalscan            # This becomes the subdomain: vitalscan.onrender.com
+    runtime: static            # A static site — just HTML, CSS, JS files
+    rootDir: vitalscan/frontend # All commands run from inside the vitalscan/frontend/ folder
+
+    # Download packages and build the production website
+    buildCommand: npm install && npm run build
+
+    # The folder that contains the built website (created by npm run build)
+    staticPublishPath: dist
+
+    # Tell browsers not to cache files — ensures users always get the latest version
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+
+    # This is required for React Router to work correctly on Render.
+    # Without this, refreshing any page (e.g. /dashboard) would show a 404 error.
+    # This rule rewrites ALL requests to index.html so React handles the routing.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    envVars:
+      # -----------------------------------------------------------------------
+      #  VITE_API_URL
+      #  The URL of your backend (Service 1 above).
+      #  IMPORTANT: After deploying the backend, replace the URL below with
+      #  your actual vitalscan-api URL from Render + "/api" at the end.
+      #  Example: https://vitalscan-api.onrender.com/api
+      # -----------------------------------------------------------------------
+      - key: VITE_API_URL
+        value: https://vitalscan-api.onrender.com/api
+
+      # -----------------------------------------------------------------------
+      #  FIREBASE KEYS
+      #  Copy these from your local frontend/.env file.
+      #  In Render dashboard → vitalscan (frontend) → Environment → add each key.
+      #  "sync: false" means Render will NOT read these from this file —
+      #  you must enter them manually in the dashboard to keep them secret.
+      # -----------------------------------------------------------------------
+      - key: VITE_FIREBASE_API_KEY
+        sync: false
+      - key: VITE_FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: VITE_FIREBASE_PROJECT_ID
+        sync: false
+      - key: VITE_FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: VITE_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: VITE_FIREBASE_APP_ID
+        sync: false
+
+      # -----------------------------------------------------------------------
+      #  ENCRYPTION KEY
+      #  The secret key used to encrypt health data before storing it.
+      #  Copy the value of VITE_ENCRYPTION_KEY from your frontend/.env file.
+      # -----------------------------------------------------------------------
+      - key: VITE_ENCRYPTION_KEY
+        sync: false
+
+      # -----------------------------------------------------------------------
+      #  EMAILJS KEYS
+      #  Used to send results emails and emergency alerts.
+      #  Copy all four values from your frontend/.env file.
+      # -----------------------------------------------------------------------
+      - key: VITE_EMAILJS_SERVICE_ID
+        sync: false
+      - key: VITE_EMAILJS_PUBLIC_KEY
+        sync: false
+      - key: VITE_EMAILJS_GREETING_TEMPLATE
+        sync: false
+      - key: VITE_EMAILJS_EMERGENCY_TEMPLATE
+        sync: false
