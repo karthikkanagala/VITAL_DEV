@@ -97,10 +97,10 @@ services:
     rootDir: vitalscan/backend # All commands run from inside the vitalscan/backend/ folder
 
     # Install all Python packages listed in requirements.txt,
-    # then run the training script to create gradient_boosting_model.pkl
-    # NOTE: if the .pkl file is already committed to GitHub, you can
-    # remove "python ../../ml/gradient_training.py" from this line to save time.
-    buildCommand: pip install -r requirements.txt && python ../../ml/gradient_training.py
+    # then cd into ml/ and run the training script from there.
+    # IMPORTANT: the training script uses relative paths (vitalscan_cleaned_dataset.csv)
+    # so it MUST be run from inside the vitalscan/ml/ folder — hence the cd command.
+    buildCommand: pip install -r requirements.txt && cd ../ml && python gradient_training.py
 
     # Start the FastAPI server. Render provides $PORT automatically — do not hardcode it.
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
@@ -110,9 +110,9 @@ services:
 
     envVars:
       # Path to the trained ML model file.
-      # This path is relative to the vitalscan/backend/ folder (where the server runs).
+      # The server runs from vitalscan/backend/ — one level up lands at vitalscan/ml/
       - key: MODEL_PATH
-        value: ../../ml/gradient_boosting_model.pkl
+        value: ../ml/gradient_boosting_model.pkl
 
       # List of websites allowed to call this API.
       # IMPORTANT: After deploying the frontend, replace this with your
