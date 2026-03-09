@@ -1,5 +1,6 @@
 # gradient_boosting_pipeline.py (FINAL FIXED VERSION)
 
+import os
 import pandas as pd
 import numpy as np
 import joblib
@@ -10,12 +11,16 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
+# Use the directory where THIS script lives so paths work from anywhere —
+# local terminal, Render build, or any CI environment.
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 # ==========================================================
 # 1. Load Dataset
 # ==========================================================
 
-df = pd.read_csv("vitalscan_cleaned_dataset.csv")
+df = pd.read_csv(os.path.join(SCRIPT_DIR, "vitalscan_cleaned_dataset.csv"))
 print("Dataset Loaded:", df.shape)
 
 
@@ -140,7 +145,7 @@ joblib.dump(
         "model": model,
         "feature_columns": X.columns.tolist()
     },
-    "gradient_boosting_model.pkl"
+    os.path.join(SCRIPT_DIR, "gradient_boosting_model.pkl")
 )
 
 print("\nModel saved as gradient_boosting_model.pkl")

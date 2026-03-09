@@ -40,7 +40,8 @@ coverage/
 htmlcov/
 .pytest_cache/
 
-# ── Large ML dataset files (exceed GitHub 100 MB limit) ──
-vitalscan/ml/*.csv
+# ── Large ML dataset files ────────────────────────────────
+# vitalscan_cleaned_dataset.csv is 95 MB (under GitHub 100 MB limit) — tracked
+# Block the raw .xls (161 MB) and any other oversized files
 vitalscan/ml/*.xls
 vitalscan/ml/*.xlsx

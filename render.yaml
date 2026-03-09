@@ -100,7 +100,7 @@ services:
     # then cd into ml/ and run the training script from there.
     # IMPORTANT: the training script uses relative paths (vitalscan_cleaned_dataset.csv)
     # so it MUST be run from inside the vitalscan/ml/ folder — hence the cd command.
-    buildCommand: pip install -r requirements.txt && cd ../ml && python gradient_training.py
+    buildCommand: pip install -r requirements.txt && python ../ml/gradient_training.py
 
     # Start the FastAPI server. Render provides $PORT automatically — do not hardcode it.
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
